@@ -16,6 +16,10 @@ int main(int argc, char **argv){
 
   DataMergeFilter filter;
   // set parameters
+  filter.SetInputSMFileName(fname_sm.Data());
+  filter.SetInputDetFileName(fname_det.Data());
+  filter.SetOutputFileName(fname_out.Data());
+
   filter.SetInputSMTreeName("t_smts");
   filter.SetInputDetTreeName("PhysicsTree");
   filter.SetTS2us_sm(0.01);
@@ -25,12 +29,12 @@ int main(int argc, char **argv){
   filter.SetBranchName_detTS("LTS");
 
   //
-  bool IsOKFile;
-  IsOKFile = filter.OpenInputFiles(fname_sm.Data(), fname_det.Data());
-  if (!IsOKFile) return 1;
-
-  IsOKFile = filter.OpenOutputFile(fname_out.Data());
-  if (!IsOKFile) return 1;
+//  bool IsOKFile;
+//  IsOKFile = filter.OpenInputFiles(fname_sm.Data(), fname_det.Data());
+//  if (!IsOKFile) return 1;
+//
+//  IsOKFile = filter.OpenOutputFile(fname_out.Data());
+//  if (!IsOKFile) return 1;
   
   filter.FindRunStart();
   filter.FindRunEnd(850000);// temp

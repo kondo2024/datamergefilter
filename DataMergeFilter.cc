@@ -17,6 +17,7 @@
 //_________________________________________________________
 DataMergeFilter::DataMergeFilter()
   : fFile_sm(0), fFile_det(0), fFile_out(0),
+    fIsFirstOpen_sm(true),fIsFirstOpen_det(true),fIsFirstOpen_out(true),
     fTreeName_out(""),
     fTree_sm(0), fTree_det(0), fTree_out(0),
     fNsrch_sm(2000), fNsrch_det(2000), fNbin(1000),
@@ -35,25 +36,33 @@ DataMergeFilter::~DataMergeFilter(){
   
 }
 //_________________________________________________________
-bool DataMergeFilter::OpenInputFiles(const char* fname_sm, const char* fname_det){
-  std::cout<<"Open Input Files ...  "<<std::flush;
+bool DataMergeFilter::OpenInputSMFile(){
+  //std::cout<<"Open Input SM Files ...  "<<std::flush;
 
-  fFileName_sm = fname_sm;
-  fFileName_det = fname_det;
-  
   fFile_sm = new TFile(fFileName_sm.Data());
   if (!fFile_sm->IsOpen()) {
     std::cout<<"Cannot open file:"<<fFileName_sm.Data()<<std::endl;
     return false;
   }
+
   fTree_sm = (TTree*)fFile_sm->Get(fTreeName_sm.Data());
   if (fTree_sm==0){
     std::cout<<"Cannot find tree:"<<fTreeName_sm.Data()<<std::endl;
     return false;
   }
-  std::cout<<"   "<<fFileName_sm.Data()<<" SM Entries="<<fTree_sm->GetEntries()<<std::flush;
 
-  
+  if (fIsFirstOpen_sm){
+    AddLog(fFile_sm->GetName());
+    std::cout<<fFile_sm->GetName()<<"  Nentries = "<<fTree_sm->GetEntries()<<std::endl;
+
+    fIsFirstOpen_sm = false;
+  }
+  return fFile_sm->IsOpen();
+}
+//_________________________________________________________
+bool DataMergeFilter::OpenInputDetFile(){
+  //std::cout<<"Open Input Det Files ...  "<<std::flush;
+
   fFile_det = new TFile(fFileName_det.Data());
   if (!fFile_det->IsOpen()) {
     std::cout<<"Cannot open file:"<<fFileName_det.Data()<<std::endl;
@@ -64,44 +73,46 @@ bool DataMergeFilter::OpenInputFiles(const char* fname_sm, const char* fname_det
     std::cout<<"Cannot find tree:"<<fTreeName_det.Data()<<std::endl;
     return false;
   }
-  std::cout<<"   "<<fFileName_det.Data()<<" Entries="<<fTree_det->GetEntries()<<std::endl;
 
-  fNsta_det = 0;
-  fNend_det = fTree_det->GetEntries();
-
-  if (fFile_out!=0){
-    AddLog(fFile_sm->GetName());
+  if (fIsFirstOpen_det){
     AddLog(fFile_det->GetName());
+    std::cout<<fFile_det->GetName()<<"  Nentries = "<<fTree_det->GetEntries()<<std::endl;
+
+    fNsta_det = 0;
+    fNend_det = fTree_det->GetEntries();
+
+    fIsFirstOpen_det = false;
   }
-  
-  return true;
+  return fFile_det->IsOpen();
 }
 //_________________________________________________________
-bool DataMergeFilter::OpenOutputFile(const char* fname){
-  std::cout<<"Open Output File ...  "<<std::flush;
-  fFileName_out = fname;
+bool DataMergeFilter::OpenOutputFile(){
+  //std::cout<<"Open Output File ...  "<<std::flush;
  
-  std::ifstream ifs(fFileName_out.Data());
-  if (!ifs.fail()) {
-    std::cout<<"Output file already exitsts"<<std::endl;
-    return false;
-  }
-  
-  fFile_out  = new TFile(fFileName_out.Data(),"new");
+  if (fIsFirstOpen_det){
 
-  // log
-  fLogDir = fFile_out->mkdir("logs");
-  TDatime dt;
-  TString str("created ");
-  str += dt.AsSQLString();
-  AddLog(str.Data());
-  
-  if (fFile_sm!=0){
-    AddLog(fFile_sm->GetName());
-    AddLog(fFile_det->GetName());
+    // check if file exists
+    std::ifstream ifs(fFileName_out.Data());
+    if (!ifs.fail()) {
+      std::cout<<"Output file already exitsts"<<std::endl;
+      return false;
+    }
+
+    fFile_out  = new TFile(fFileName_out.Data(),"new");
+    // log
+    fLogDir = fFile_out->mkdir("logs");
+    TDatime dt;
+    TString str("created ");
+    str += dt.AsSQLString();
+    AddLog(str.Data());
+    
+    fIsFirstOpen_out = false;
+
+  }else{
+    fFile_out  = new TFile(fFileName_out.Data(),"update");
+    fLogDir = (TDirectory*)fFile_out->Get("logs");
   }
-  
-  std::cout<<"Done"<<std::endl;
+
   return fFile_out->IsOpen();
 }
 //_________________________________________________________
@@ -111,6 +122,9 @@ void DataMergeFilter::FindRunStart(){
     Using this, find run start in the PFAD root file.
    */
   std::cout<<"Find Run Start ...  "<<std::flush;
+
+  OpenOutputFile();
+  OpenInputDetFile();
   fFile_out->cd();
   
   Long64_t Nentries = fTree_det->GetEntries();
@@ -176,11 +190,16 @@ void DataMergeFilter::FindRunStart(){
   }
 
   fNsta_det = xsta;
+
+  fFile_det->Close();
+  fFile_out->Close();
   std::cout<<"Nstart = "<<fNsta_det<<std::endl;
 }
 //_________________________________________________________
 void DataMergeFilter::FindRunEnd(Long64_t nmax){
   std::cout<<"Find Run End ...  "<<std::flush;
+  OpenOutputFile();
+  OpenInputDetFile();
 
   if (nmax<0) nmax = fTree_det->GetEntries();
 
@@ -250,6 +269,8 @@ void DataMergeFilter::FindRunEnd(Long64_t nmax){
   fNend_det = 1.1*xsto;// 10% margin
   if ( fNend_det > fTree_det->GetEntries() ) fNend_det  = fTree_det->GetEntries();
   
+  fFile_det->Close();
+  fFile_out->Close();
   std::cout<<"Nend = "<<fNend_det<<std::endl;
 }
 //_________________________________________________________
@@ -257,7 +278,11 @@ void DataMergeFilter::TSCombinations(TString mode){
   mode.ToLower();
   std::cout<<"Taking TS Combinations from run "<<mode.Data()<<" ...  "<<std::flush;
 
-  TString log = Form("Nsrch_sm=%d Nsrch_det=%d",fNsrch_sm,fNsrch_det); 
+  OpenOutputFile();
+  OpenInputSMFile();
+  OpenInputDetFile();
+  
+  TString log = Form("Nsrch_sm = %d   Nsrch_det = %d",fNsrch_sm,fNsrch_det); 
   AddLog(log.Data());
   std::cout<<log.Data()<<std::endl;
   
@@ -336,6 +361,9 @@ void DataMergeFilter::TSCombinations(TString mode){
   std::cout<<"\r   Event: "<<i_count<<" / "<<fNsrch_sm*fNsrch_det<<std::endl;
 
   t_comb->Write();
+
+  fFile_sm->Close();
+  fFile_det->Close();
   fFile_out->Close();
   return;
 }
@@ -343,7 +371,7 @@ void DataMergeFilter::TSCombinations(TString mode){
 void DataMergeFilter::CorrectTSPeriod(){
   std::cout<<"Correct TS Period ...  "<<std::endl;
 
-  CloseOpenOutputFile();
+  OpenOutputFile();
   fTree_comb0 = (TTree*)fFile_out->Get("t_comb0");
 
   Int_t ihist=0;
@@ -406,20 +434,24 @@ void DataMergeFilter::CorrectTSPeriod(){
   SetTS2us_det(corr*fTS2us_det);
   fTSoff_sta_us = xpeak;
 
-  TString log = Form("TS2us_det=%17.15lf",fTS2us_det);
+  TString log = Form("TS2us_det = %17.15lf",fTS2us_det);
   AddLog(log.Data());
   std::cout<<log.Data()<<std::flush;
 
-  log = Form("TSoff(start)=%17.3lfus",fTSoff_sta_us);  
+  log = Form("TSoff(start) = %17.3lf us",fTSoff_sta_us);  
   AddLog(log.Data());
   std::cout<<"  "<<log.Data()<<std::endl;
+
+  fFile_out->Close();
 }
 //_________________________________________________________
 void DataMergeFilter::FindTSOffset(TString mode){
   mode.ToLower();
   std::cout<<"Finding Offset at run "<<mode.Data()<<" ..."<<std::flush;
 
-  CloseOpenOutputFile();
+  OpenOutputFile();
+  //CloseOpenOutputFile();
+  
   TTree *tree = 0;
   if      (mode == "start") tree = (TTree*)fFile_out->Get("t_comb0");
   else if (mode == "end")   tree = (TTree*)fFile_out->Get("t_comb1");
@@ -473,10 +505,14 @@ void DataMergeFilter::FindTSOffset(TString mode){
   }
   AddLog(log.Data());
   std::cout<<log.Data()<<std::endl;
+  fFile_out->Close();
 }
 //_________________________________________________________
 void DataMergeFilter::Filter(){
   std::cout<<"Filtering ...  "<<std::endl;
+  OpenOutputFile();
+  OpenInputSMFile();
+  OpenInputDetFile();
 
   if (fMatchWindow_us<0){
     std::cout<<"TS Match Window is set to 1000 us"<<std::endl;
@@ -502,7 +538,7 @@ void DataMergeFilter::Filter(){
   // ...
     // ***************************************
   
-  CloseOpenOutputFile();
+  //CloseOpenOutputFile();
   
   fFile_out->cd();
   if (fTreeName_out.Length()==0){
@@ -597,7 +633,7 @@ void DataMergeFilter::Filter(){
 void DataMergeFilter::MakePlots(){
   std::cout<<"Make plots for check...  "<<std::flush;
 
-  CloseOpenOutputFile();
+  OpenOutputFile();
 
   fTree_out = (TTree*)fFile_out->Get(fTreeName_out.Data());
   fTree_out->AddFriend(fTreeName_sm.Data(),fFileName_sm.Data());
@@ -613,11 +649,14 @@ void DataMergeFilter::MakePlots(){
   fTree_out->Draw(str.Data(),"IsTSMatched","colz");  
   fFile_out->Get("hchk2")->Write();
 
-  
+  fFile_out->Close();
   std::cout<<"Done"<<std::endl;
 }
 //_________________________________________________________
 void DataMergeFilter::AddLog(const char* log){
+  if (!fFile_out->IsOpen()) 
+    std::cout<<"Open Output file before call AddLog"<<std::endl;
+
   TDirectory *current_dir = gDirectory;
   ++ilog;
   TNamed *l = new TNamed(Form("log%d",ilog),  log); 
@@ -690,19 +729,5 @@ Bool_t DataMergeFilter::IsPeakABin(TH1 *hist){
 
   Bool_t TF = ( ymax-y_l > TMath::Abs(y_l-y1) ) && ( ymax-y_r > TMath::Abs(y_r-y1) );
   return TF;
-}
-//_________________________________________________________
-void DataMergeFilter::CloseOpenOutputFile(){
-
-  if (fFile_out->IsOpen()){
-    fFile_out->Close();
-  }
-
-  fFile_out = new TFile(fFileName_out.Data(), "update");
-  fLogDir = (TDirectory*)fFile_out->Get("logs");
-
-  fTree_comb0 = (TTree*)fFile_out->Get("t_comb0");
-  fTree_comb1 = (TTree*)fFile_out->Get("t_comb1");
-  
 }
 //_________________________________________________________

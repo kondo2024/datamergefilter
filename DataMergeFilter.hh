@@ -15,8 +15,8 @@ public:
   DataMergeFilter();
   ~DataMergeFilter();
 
-  bool OpenInputFiles(const char* fname_sm, const char* fname_det);
-  bool OpenOutputFile(const char* fname);
+  //bool OpenInputFiles(const char* fname_sm, const char* fname_det);
+
   void FindRunStart();                  // Optional: Use these
   void FindRunEnd(Long64_t nmax=-1);    // if run start is much different
   void TSCombinations(TString mode="start");// mode = "start" or "end"
@@ -28,6 +28,9 @@ public:
   void Filter();        // Fill if TS is within window
   void MakePlots();     // For checking
 
+  void SetInputSMFileName(const char* fname){fFileName_sm = fname;}
+  void SetInputDetFileName(const char* fname){fFileName_det = fname;}
+  void SetOutputFileName(const char* fname){fFileName_out = fname;}
 
   void SetInputSMTreeName(const char* treename){fTreeName_sm = treename;}
   void SetInputDetTreeName(const char* treename){fTreeName_det = treename;}
@@ -68,9 +71,12 @@ protected:
   TH1* DrawdTS(TTree* t_comb, TString hname, Double_t fac, Double_t xpeak, Double_t dx);
   Bool_t ZoomHist(TTree* t, TH1 *hist, Double_t fac);
   Bool_t IsPeakABin(TH1* hist);
-  void CloseOpenOutputFile();
+
+  bool OpenInputSMFile();
+  bool OpenInputDetFile();
+  bool OpenOutputFile();
   
-// members
+  // members
   TString fFileName_sm;
   TString fFileName_det;
   TString fFileName_out;
@@ -79,6 +85,10 @@ protected:
   TFile *fFile_det;
   TFile *fFile_out;
 
+  Bool_t fIsFirstOpen_sm;
+  Bool_t fIsFirstOpen_det;
+  Bool_t fIsFirstOpen_out;
+  
   TString fTreeName_sm;
   TString fTreeName_det;
   TString fTreeName_out;
