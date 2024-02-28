@@ -1,5 +1,4 @@
 # DataMergeFilter
-(2024/02/28)
 
 This extracts and saves detector data which coincide with SAMURAI
 timestamp.
