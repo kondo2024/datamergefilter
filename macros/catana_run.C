@@ -1,7 +1,7 @@
 void catana_run(){
   TString fname_sm("root/hd01_smts_run0136.root");
   TString fname_det("ridf/hd01/v1725/run_139/FILTERED/SDataF_run_139.root");
-  TString fname_out("temp.out");
+  TString fname_out("temp.root");
 
   DataMergeFilter filter;
   // set parameters

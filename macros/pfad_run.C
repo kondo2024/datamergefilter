@@ -1,7 +1,7 @@
 void pfad_run(){
   TString fname_sm("root/hd01_smts_run0136.root");
   TString fname_det("root/pfad_230MeV_run07_ana.root");
-  TString fname_out("temp.out");
+  TString fname_out("temp.root");
 
   DataMergeFilter filter;
   // set parameters
