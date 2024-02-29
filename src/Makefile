@@ -17,7 +17,7 @@ catana_data_filter: $(OBJS) catana_data_filter.o
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $@.o
 
 clean:
-	rm -f $(TARGETS) $(OBJS) *~
+	rm -f $(TARGETS) *.o *~
 	rm -f ../bin/$(TARGETS)
 
 install:
