@@ -3,7 +3,8 @@ void pfad_run(){
   TString fname_det("root/pfad_230MeV_run07_ana.root");
   TString fname_out("temp.root");
 
-  DataMergeFilter filter;
+  //DataMergeFilter filter;
+  DataMergeFilter_PFAD filter;
   // set parameters
   filter.SetInputSMTreeName("t_smts");
   filter.SetInputDetTreeName("PhysicsTree");
