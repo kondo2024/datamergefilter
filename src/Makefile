@@ -21,5 +21,5 @@ clean:
 	rm -f $(TARGET2) ../bin/$(TARGET2)
 
 install:
-	cp $(TARGET1) ../bin
-	cp $(TARGET2) ../bin
+	cp $(TARGET1) ../bin/
+	cp $(TARGET2) ../bin/

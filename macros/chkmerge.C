@@ -22,7 +22,10 @@ void chkmerge(){
   t->Draw("Energy:Channel>>h8",
 	  "PhysicsTree_flt.IsTSMatched&&Data_F_flt.IsTSMatched&&Energy>0","colz");
   
-  t->Draw("ProjectionL.z()>>h9",
-	  "PhysicsTree_flt.IsTSMatched&&Data_F_flt.IsTSMatched&&Delta>0","colz");
+  t->Draw("Channel:ThetaL>>h9(100,0,90,7,-0.5,6.5)",
+	  "PhysicsTree_flt.IsTSMatched&&Data_F_flt.IsTSMatched&&ThetaL>0&&Board==1","colz");
+  
+  t->Draw("Channel:ThetaR>>h10(100,0,90,7,-0.5,6.5)",
+	  "PhysicsTree_flt.IsTSMatched&&Data_F_flt.IsTSMatched&&ThetaR>0&&Board==0","colz");
   
 }
