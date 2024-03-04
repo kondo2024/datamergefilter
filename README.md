@@ -14,9 +14,9 @@ Sample main program for PFAD using DataMergeFilter_PFAD. "cd src;
 make; make install" generates executable file. NPTOOL is required and
 $NPTOOL_HOME is needed to be defined (see Makefile).
 
-### macros/pfad_run.C
+### macros/pfad_run.cc
 sample root macro to use DataMergeFilter_PFAD. They are useful to see what
 is going on in the procedure shown on Canvas. 
 
-### macros/chkmerge.C
+### macros/chkmerge.cc
 sample root macro to make plots from merged tree data.
