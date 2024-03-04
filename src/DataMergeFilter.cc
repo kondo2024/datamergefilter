@@ -91,12 +91,12 @@ bool DataMergeFilter::OpenOutputFile(){
  
   if (fIsFirstOpen_det){
 
-    // check if file exists
-    std::ifstream ifs(fFileName_out.Data());
-    if (!ifs.fail()) {
-      std::cout<<"Output file already exitsts"<<std::endl;
-      return false;
-    }
+//    // check if file exists
+//    std::ifstream ifs(fFileName_out.Data());
+//    if (!ifs.fail()) {
+//      std::cout<<"Output file already exitsts"<<std::endl;
+//      return false;
+//    }
 
     fFile_out  = new TFile(fFileName_out.Data(),"new");
     // log
@@ -666,6 +666,16 @@ void DataMergeFilter::AddLog(const char* log){
   current_dir->cd();
 }
 //_________________________________________________________
+bool DataMergeFilter::SetOutputFileName(const char* fname){
+  fFileName_out = fname;
+  // check if file exists
+  std::ifstream ifs(fFileName_out.Data());
+  if (!ifs.fail()) {
+    std::cout<<"Output file already exitsts"<<std::endl;
+    return false;
+  }
+  return true;
+}
 //_________________________________________________________
 //_________________________________________________________
 //_________________________________________________________

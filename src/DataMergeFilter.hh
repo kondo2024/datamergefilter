@@ -27,10 +27,13 @@ public:
 
   void Filter();        // Fill if TS is within window
   void MakePlots();     // For checking
+  // method for adding log
+  void AddLog(const char* log);
+  
 
   void SetInputSMFileName(const char* fname){fFileName_sm = fname;}
   void SetInputDetFileName(const char* fname){fFileName_det = fname;}
-  void SetOutputFileName(const char* fname){fFileName_out = fname;}
+  bool SetOutputFileName(const char* fname);
 
   void SetInputSMTreeName(const char* treename){fTreeName_sm = treename;}
   void SetInputDetTreeName(const char* treename){fTreeName_det = treename;}
@@ -61,9 +64,6 @@ public:
 
   Double_t GetTSMatchWindow(){return fMatchWindow_us;}
 
-  // method for adding log
-  void AddLog(const char* log);
-  
 protected:
 
   TH1* ChangePlotRange(TTree* t_comb, TString hname, Double_t fac,

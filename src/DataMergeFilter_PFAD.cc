@@ -21,7 +21,8 @@ void DataMergeFilter_PFAD::Run(const char* fname_sm,
 
   SetInputSMFileName(fname_sm);
   SetInputDetFileName(fname_pfad);
-  SetOutputFileName(fname_out);
+  bool IsFileOK = SetOutputFileName(fname_out);
+  if (! IsFileOK ) return;
 
   SetInputSMTreeName("t_smts");
   SetInputDetTreeName("PhysicsTree");
