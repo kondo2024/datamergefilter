@@ -15,8 +15,8 @@ make; make install" generates executable file. NPTOOL is required and
 $NPTOOL_HOME is needed to be defined (see Makefile).
 
 ### macros/pfad_run.C
-sample root macros to use DataMergeFilter_PFAD. They are useful to see what
+sample root macro to use DataMergeFilter_PFAD. They are useful to see what
 is going on in the procedure shown on Canvas. 
 
 ### macros/chkmerge.C
-sample root macros to make plots from merged data.
+sample root macro to make plots from merged tree data.
