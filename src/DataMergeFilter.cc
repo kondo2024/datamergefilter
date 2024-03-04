@@ -30,9 +30,14 @@ DataMergeFilter::DataMergeFilter()
 //_________________________________________________________
 DataMergeFilter::~DataMergeFilter(){
 
-  if (fFile_sm->IsOpen())  fFile_sm->Close();
-  if (fFile_det->IsOpen()) fFile_det->Close();
-  if (fFile_out !=0 && fFile_out->IsOpen()) fFile_out->Close();
+  if (fFile_sm != 0)
+    if (fFile_sm->IsOpen())  fFile_sm->Close();
+  
+  if (fFile_det != 0)
+    if (fFile_det->IsOpen()) fFile_det->Close();
+  
+  if (fFile_out !=0)
+    if (fFile_out->IsOpen()) fFile_out->Close();
   
 }
 //_________________________________________________________
