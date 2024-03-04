@@ -531,12 +531,12 @@ void DataMergeFilter::Filter(){
 
   ULong64_t TS_det=0;
   fTree_det->SetBranchAddress(fBrName_detTS.Data(),&TS_det);
-    // ***************************************
+  // ***************************************
   //Double_t Delta=0;
   // ...
   //fTree_det->SetBranchAddress("Delta",&Delta);
   // ...
-    // ***************************************
+  // ***************************************
   
   //CloseOpenOutputFile();
   
@@ -551,10 +551,10 @@ void DataMergeFilter::Filter(){
   fTree_out->Branch("IsTSMatched",&IsTSMatched);
   fTree_out->Branch("dTS",&dTS_min);
   fTree_out->Branch(fBrName_detTS.Data(),&TS_det);
-    // ***************************************
+  // ***************************************
   //fTree_out->Branch("Delta",&Delta);
   // ...
-    // ***************************************
+  // ***************************************
 
   Long64_t N_sm = fTree_sm->GetEntries();
 

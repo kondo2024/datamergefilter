@@ -143,6 +143,10 @@ void DataMergeFilter_PFAD::Filter(){
     if (IsTSMatched){
       fTree_det->GetEntry(i_det_match);
       N_match++;
+    }else{// input dummy date
+      TS_det = 0;
+      dTS_min = 0;
+      pfadphysics->clear();
     }
     fTree_out->Fill();
 
